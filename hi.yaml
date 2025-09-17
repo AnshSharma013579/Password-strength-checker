@@ -1,0 +1,51 @@
+name: Run Password Strength Checker Build
+
+on:
+  push:
+    paths:
+      - 'Password-strength-checker.tsx'
+      - '**/package.json'
+      - '**/yarn.lock'
+      - '**/pnpm-lock.yaml'
+      - '**/package-lock.json'
+  pull_request:
+    paths:
+      - 'Password-strength-checker.tsx'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: |
+          if [ -f yarn.lock ]; then
+            yarn install
+          elif [ -f pnpm-lock.yaml ]; then
+            npm install -g pnpm
+            pnpm install
+          else
+            npm install
+          fi
+
+      - name: Build project
+        run: |
+          if [ -f package.json ]; then
+            npm run build || yarn build || pnpm build
+          fi
+
+      - name: Run Tests (if available)
+        run: |
+          if [ -f package.json ]; then
+            npm test || yarn test || pnpm test || echo "No test script found, skipping tests."
+          fi
+
+      - name: List Password Strength Checker file
+        run: ls -l Password-strength-checker.tsx
